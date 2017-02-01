@@ -35,7 +35,7 @@ squarePath = [0.5,0;0.5,0;0.5,0;0.5,0;0.5,0;0.5,0;0.5,0;0.5,0; ...
              0,30;0,30;0,30];
 squarePath(:,1) = 0.25;
 robotPath = [squarePath;squarePath;squarePath];
-errPer = 0.30;  % odometry error percentage
+errPer = 0.20;  % odometry error percentage
 % End Generate Robot
 %--------------------------------------------------------------------------
 

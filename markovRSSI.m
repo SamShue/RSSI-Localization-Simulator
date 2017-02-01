@@ -1,6 +1,6 @@
 function [ rssi_out, dist_out ] = markovRSSI( numOfNodes, type )
 % Get list of all files in directory
-direct = 'C:\Users\Waron\Dropbox\Documents\Research and Papers\Research\RSSI Distance Estimation\Highschool Volunteers 2016\Signal Strength Data';
+direct = 'Signal Strength Data';
 listing = dir(direct);
 listing = listing([listing.isdir]==1);
 
