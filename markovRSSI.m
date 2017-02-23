@@ -98,9 +98,10 @@ end
 % nextState(isnan(nextState)) = 0.001;
 
 % Generate plots based on Markov model
+seed = tmpMeasures(1,randi(length(tmpMeasures(1,:))));
 for jj = 1:numOfNodes
     % Create random initial value:
-    rssi(1) = tmpMeasures(1,randi(length(tmpMeasures(1,:))));
+    rssi(1) = seed;
     for ii = 2:length(dist)
         currentRSSIIndex = find(rssiList == rssi(ii-1));
         % find next state index

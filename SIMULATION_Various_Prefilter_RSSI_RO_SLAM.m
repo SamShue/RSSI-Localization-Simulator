@@ -79,6 +79,11 @@ for ii = 1:length(robotPath)
                             (dr_pose(ii-1,2) + u(1)*sind(dr_pose(ii-1,3)+u(2))), ...
                             (dr_pose(ii-1,3) + u(2))];
         ohist = [ohist;u(1)];
+        % Get dead reckoned distance to each node
+        for jj = 1:numOfNodes
+            temp(jj) = euclidDist(dr_pose(ii,1:2),node(jj).pos);
+        end
+        o2nhist = [o2nhist;temp];
     end
 %     u = [robotPath(ii,1),robotPath(ii,2)];
     % End odometry data
@@ -326,18 +331,13 @@ for ii = 1:length(robotPath)
             dhhist = d_hat;
         else
             for jj = 1:numOfNodes
+                % Calculated covariance and velocities for current node
                 if(ii - 2 > filtLen)
                     v_rssi = vectorDerivative(dhist(:,jj)); % velocity vector from estimated distances
                     r = cov(v_rssi(end-filtLen:end),vhist(end-filtLen-1:end-1,jj));
-                    R(jj) = abs(r(1,2))*100000;
                 else
                     v_rssi = vectorDerivative(dhist(:,jj)); % velocity vector from estimated distances
                     r = cov(v_rssi,vhist(:,jj));
-                    if(ii == 1)
-                        R(jj) = 10000;
-                    else
-                        R(jj) = abs(r(1,2))*100000;
-                    end
                 end
 
                 p_dist = d_hat(jj)+vhist(end,jj);   % Predicted distance based on change in odom
@@ -399,13 +399,13 @@ for ii = 1:length(robotPath)
         if(strcmp(method,'Particle'))
             [x,P] = EKF_RO_SLAM(x,P,partDist(jj),u,jj,100,Q);
         elseif(strcmp(method,'Menegatti'))
-            [x,P] = EKF_RO_SLAM(x,P,mDist(jj),u,jj,10,Q);
+            [x,P] = EKF_RO_SLAM(x,P,mDist(jj),u,jj,mDist(jj)*100,Q);
         elseif(strcmp(method,'NoFilter'))
             [x,P] = EKF_RO_SLAM(x,P,d(jj),u,jj,100,Q);
         elseif(strcmp(method,'CorrFilt'))
-            [x,P]= EKF_RO_SLAM(x,P,d_hat(jj),u,jj,R(jj),Q);
+            [x,P]= EKF_RO_SLAM(x,P,d_hat(jj),u,jj,d_hat(jj)*100,Q);
         elseif(strcmp(method,'TrustFilt'))
-            [x,P]= EKF_RO_SLAM(x,P,d_hat(jj),u,jj,R(jj),Q);
+            [x,P]= EKF_RO_SLAM(x,P,d_hat(jj),u,jj,d_hat(jj)*100,Q);
         else
             [x,P] = EKF_RO_SLAM(x,P,dist2node(jj),u,jj,100,Q); % Test EKF
         end
@@ -508,7 +508,8 @@ if(strcmp(method,'TrustFilt'))
         plot(dhhist(:,jj),'red');
         plot(dhist(:,jj),'green');
         plot(d2nhist(:,jj),'blue');
-        legend('filtered','unfiltered','actual');
+        plot(o2nhist(:,jj),'yellow');
+        legend('filtered','unfiltered','actual','dead-reckoned');
         title(strcat('Distance to Node over Time: Node ',num2str(jj)));
         v_rssi = vectorDerivative(dhist(:,jj));
         subplot(4,1,2); hold on;
